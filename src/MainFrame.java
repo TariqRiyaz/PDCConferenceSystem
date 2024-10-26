@@ -21,10 +21,12 @@ public class MainFrame extends JFrame {
         
         // Panels for each functionality
         AttendeeRegistrationPanel registrationPanel = new AttendeeRegistrationPanel(conferenceSystem);
-        ViewSessionsPanel viewSessionsPanel = new ViewSessionsPanel(); // Add ViewSessionsPanel here
+        ViewSessionsPanel viewSessionsPanel = new ViewSessionsPanel();
+        SubmitFeedbackPanel submitFeedbackPanel = new SubmitFeedbackPanel(conferenceSystem); // Add SubmitFeedbackPanel
 
         mainPanel.add(registrationPanel, "Registration");
-        mainPanel.add(viewSessionsPanel, "ViewSessions"); // Add to card layout
+        mainPanel.add(viewSessionsPanel, "ViewSessions");
+        mainPanel.add(submitFeedbackPanel, "SubmitFeedback"); // Add to card layout
 
         // Create menu buttons
         JButton btnRegister = new JButton("Register Attendee");
@@ -44,7 +46,8 @@ public class MainFrame extends JFrame {
 
         // Action Listeners to switch panels
         btnRegister.addActionListener(e -> cardLayout.show(mainPanel, "Registration"));
-        btnViewSessions.addActionListener(e -> cardLayout.show(mainPanel, "ViewSessions")); // Show ViewSessionsPanel
+        btnViewSessions.addActionListener(e -> cardLayout.show(mainPanel, "ViewSessions"));
+        btnSubmitFeedback.addActionListener(e -> cardLayout.show(mainPanel, "SubmitFeedback")); // Show SubmitFeedbackPanel
         btnExit.addActionListener(e -> System.exit(0)); // Exit program
     }
     

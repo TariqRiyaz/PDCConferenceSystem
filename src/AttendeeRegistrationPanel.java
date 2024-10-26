@@ -1,4 +1,3 @@
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -32,6 +31,20 @@ public class AttendeeRegistrationPanel extends JPanel {
         List<Session> sessions = Session.getAllSessions();
         String[] sessionTitles = sessions.stream().map(Session::getTitle).toArray(String[]::new);
         sessionList = new JList<>(sessionTitles);
+        
+        // Allow toggle selection
+        sessionList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        sessionList.setSelectionModel(new DefaultListSelectionModel() {
+            @Override
+            public void setSelectionInterval(int index0, int index1) {
+                if (isSelectedIndex(index0)) {
+                    removeSelectionInterval(index0, index1);
+                } else {
+                    addSelectionInterval(index0, index1);
+                }
+            }
+        });
+        
         sessionPanel.add(new JScrollPane(sessionList), BorderLayout.CENTER);
 
         // South panel for buttons

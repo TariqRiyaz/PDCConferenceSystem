@@ -1,3 +1,0 @@
-Attendee,Tariq,tariq.mohamedriyaz@gmail.com,Life in the day of Mark Wahlberg
-Attendee,tariq,tariq.mohamedriyaz@gmail.com,Life in the day of Mark Wahlberg
-Attendee,manal,saadiya@gmail.com,Funny life
