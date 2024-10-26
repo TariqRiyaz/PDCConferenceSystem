@@ -64,15 +64,13 @@ public class AttendeeRegistrationPanel extends JPanel {
                 String name = txtName.getText();
                 String email = txtEmail.getText();
                 
-                // Create attendee and add selected sessions
-                Attendee attendee = new Attendee(name, email);
-                for (String sessionTitle : sessionList.getSelectedValuesList()) {
-                    attendee.addSession(sessionTitle);
-                }
+                // Get selected session titles
+        List<String> selectedSessions = sessionList.getSelectedValuesList();
 
-                // Add the attendee to the conference system
-                conferenceSystem.addParticipant(attendee);
-                JOptionPane.showMessageDialog(null, "Attendee Registered Successfully");
+        // Save attendee and their sessions to the database
+        DatabaseManager.addAttendee(name, email, selectedSessions);
+
+        JOptionPane.showMessageDialog(null, "Attendee Registered Successfully");
             }
         });
     }

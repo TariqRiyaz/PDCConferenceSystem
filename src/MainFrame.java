@@ -52,6 +52,7 @@ public class MainFrame extends JFrame {
     }
     
     public static void main(String[] args) {
+        DatabaseManager.initializeDatabase();
         SwingUtilities.invokeLater(() -> {
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
