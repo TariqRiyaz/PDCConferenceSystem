@@ -4,11 +4,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseManager {
     // JDBC URL for embedded Derby database
-    private static final String DB_URL = "jdbc:derby://localhost:1527/conferenceDB;create=true";
+    private static final String DB_URL = "jdbc:derby:conferenceDB;create=true";
+
 
     // Method to connect to the database
     public static Connection connect() throws SQLException {
@@ -105,8 +107,8 @@ public class DatabaseManager {
     // Initialize database (run only once to create the tables)
     public static void initializeDatabase() {
         try (Connection conn = connect();
-                Statement stmt = conn.createStatement()) {
-
+             Statement stmt = conn.createStatement()) {
+    
             // Create Attendee table if it doesn't exist
             try {
                 String createAttendeeTable = "CREATE TABLE Attendee (" +
@@ -115,11 +117,11 @@ public class DatabaseManager {
                         "email VARCHAR(100) UNIQUE)";
                 stmt.executeUpdate(createAttendeeTable);
             } catch (SQLException e) {
-                if (!e.getSQLState().equals("X0Y32")) { // X0Y32: Table already exists
+                if (!e.getSQLState().equals("X0Y32")) {
                     e.printStackTrace();
                 }
             }
-
+    
             // Create Session table if it doesn't exist
             try {
                 String createSessionTable = "CREATE TABLE Session (" +
@@ -132,12 +134,13 @@ public class DatabaseManager {
                     e.printStackTrace();
                 }
             }
-
+    
             // Create Attendee_Session table if it doesn't exist
             try {
                 String createAttendeeSessionTable = "CREATE TABLE Attendee_Session (" +
                         "attendee_id INT, " +
                         "session_id INT, " +
+                        "feedback VARCHAR(500), " +
                         "FOREIGN KEY (attendee_id) REFERENCES Attendee(id), " +
                         "FOREIGN KEY (session_id) REFERENCES Session(id))";
                 stmt.executeUpdate(createAttendeeSessionTable);
@@ -146,13 +149,13 @@ public class DatabaseManager {
                     e.printStackTrace();
                 }
             }
-
+    
             System.out.println("Database initialized successfully.");
-
+    
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
+    }    
 
     public static void displayAttendeeSessions() {
         String query = "SELECT a.name, s.title FROM Attendee a " +
@@ -243,5 +246,72 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
+    
+    public static void submitFeedback(String email, String sessionTitle, String feedback) {
+        try (Connection conn = connect()) {
+            int attendeeId = getAttendeeIdByEmail(conn, email);
+            int sessionId = findSessionIdByTitle(conn, sessionTitle);
+
+            if (attendeeId != -1 && sessionId != -1) {
+                String updateFeedbackSQL = "UPDATE Attendee_Session SET feedback = ? WHERE attendee_id = ? AND session_id = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(updateFeedbackSQL)) {
+                    pstmt.setString(1, feedback);
+                    pstmt.setInt(2, attendeeId);
+                    pstmt.setInt(3, sessionId);
+                    int rowsAffected = pstmt.executeUpdate();
+                    
+                    if (rowsAffected > 0) {
+                        System.out.println("Feedback submitted successfully.");
+                    } else {
+                        System.out.println("No matching attendee-session record found.");
+                    }
+                }
+            } else {
+                System.out.println("Attendee or session not found.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> getSessionsForAttendee(String email) {
+        List<String> sessions = new ArrayList<>();
+
+        String query = "SELECT s.title " +
+               "FROM Attendee a " +
+               "JOIN Attendee_Session att_sess ON a.id = att_sess.attendee_id " +
+               "JOIN Session s ON att_sess.session_id = s.id " +
+               "WHERE a.email = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, email);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    sessions.add(rs.getString("title"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return sessions;
+    }
+    
+    private static int getAttendeeIdByEmail(Connection conn, String email) throws SQLException {
+        String query = "SELECT id FROM Attendee WHERE email = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        }
+        return -1;
+    }
+    
 
 }

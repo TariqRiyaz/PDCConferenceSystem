@@ -7,10 +7,8 @@ import java.util.List;
 public class AttendeeRegistrationPanel extends JPanel {
     private JTextField txtName, txtEmail;
     private JList<String> sessionList;
-    private ConferenceSystem conferenceSystem;
 
-    public AttendeeRegistrationPanel(ConferenceSystem conferenceSystem) {
-        this.conferenceSystem = conferenceSystem;
+    public AttendeeRegistrationPanel() {
         setLayout(new BorderLayout());
 
         // North panel for input fields

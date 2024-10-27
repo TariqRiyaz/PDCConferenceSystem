@@ -1,4 +1,3 @@
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,10 +8,8 @@ public class SubmitFeedbackPanel extends JPanel {
     private JTextField txtEmail;
     private JTextArea txtFeedback;
     private JComboBox<String> sessionComboBox;
-    private ConferenceSystem conferenceSystem;
 
-    public SubmitFeedbackPanel(ConferenceSystem conferenceSystem) {
-        this.conferenceSystem = conferenceSystem;
+    public SubmitFeedbackPanel() {
         setLayout(new BorderLayout());
 
         // North panel for email input
@@ -48,20 +45,7 @@ public class SubmitFeedbackPanel extends JPanel {
         txtEmail.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String email = txtEmail.getText().trim();
-                IPerson person = conferenceSystem.getParticipantByEmail(email);
-                
-                if (person instanceof Attendee) {
-                    Attendee attendee = (Attendee) person;
-                    List<String> sessions = attendee.getSessionNames();
-                    
-                    // Clear and populate sessionComboBox with attendee's sessions
-                    sessionComboBox.removeAllItems();
-                    for (String session : sessions) {
-                        sessionComboBox.addItem(session);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Attendee not found. Please register first.");
-                }
+                loadSessionsForAttendee(email);
             }
         });
 
@@ -81,29 +65,34 @@ public class SubmitFeedbackPanel extends JPanel {
                     JOptionPane.showMessageDialog(null, "Feedback cannot be empty.");
                     return;
                 }
-                
-                // Format and save feedback
-                IPerson person = conferenceSystem.getParticipantByEmail(email);
-                if (person instanceof Attendee) {
-                    Attendee attendee = (Attendee) person;
-                    String formattedFeedback = String.format(
-                        "Attendee: %s\nEmail: %s\nSession: %s\nFeedback: %s\n",
-                        attendee.getName(), attendee.getEmail(), selectedSession, feedbackText
-                    );
-                    
-                    Feedback feedback = new Feedback(formattedFeedback);
-                    feedback.saveToFile("feedback.txt");
-                    JOptionPane.showMessageDialog(null, "Thank you for your feedback!");
-                    
-                    // Clear feedback input fields after submission
-                    txtEmail.setText("");
-                    txtFeedback.setText("");
-                    sessionComboBox.removeAllItems();
-                    sessionComboBox.addItem("Select your registered session");
-                } else {
-                    JOptionPane.showMessageDialog(null, "Attendee not found. Please register first.");
-                }
+
+                // Submit feedback to database
+                DatabaseManager.submitFeedback(email, selectedSession, feedbackText);
+                JOptionPane.showMessageDialog(null, "Thank you for your feedback!");
+
+                // Clear feedback input fields after submission
+                txtEmail.setText("");
+                txtFeedback.setText("");
+                sessionComboBox.removeAllItems();
+                sessionComboBox.addItem("Select your registered session");
             }
         });
+    }
+
+    // Method to load sessions for an attendee from the database
+    private void loadSessionsForAttendee(String email) {
+        List<String> sessions = DatabaseManager.getSessionsForAttendee(email);
+        System.out.println(sessions.size());
+        
+        // Clear and populate sessionComboBox with attendee's sessions
+        sessionComboBox.removeAllItems();
+        if (sessions.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No sessions found for this attendee. Please register first.");
+            sessionComboBox.addItem("Select your registered session");
+        } else {
+            for (String session : sessions) {
+                sessionComboBox.addItem(session);
+            }
+        }
     }
 }

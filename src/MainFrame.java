@@ -20,9 +20,9 @@ public class MainFrame extends JFrame {
         JPanel mainPanel = new JPanel(cardLayout);
         
         // Panels for each functionality
-        AttendeeRegistrationPanel registrationPanel = new AttendeeRegistrationPanel(conferenceSystem);
+        AttendeeRegistrationPanel registrationPanel = new AttendeeRegistrationPanel();
         ViewSessionsPanel viewSessionsPanel = new ViewSessionsPanel();
-        SubmitFeedbackPanel submitFeedbackPanel = new SubmitFeedbackPanel(conferenceSystem); // Add SubmitFeedbackPanel
+        SubmitFeedbackPanel submitFeedbackPanel = new SubmitFeedbackPanel(); // Add SubmitFeedbackPanel
 
         mainPanel.add(registrationPanel, "Registration");
         mainPanel.add(viewSessionsPanel, "ViewSessions");
