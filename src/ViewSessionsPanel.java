@@ -1,10 +1,12 @@
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 public class ViewSessionsPanel extends JPanel {
-    public ViewSessionsPanel() {
+    private SessionService sessionService;  // Injected session service
+
+    public ViewSessionsPanel(SessionService sessionService) {
+        this.sessionService = new SessionService();  // Dependency Injection
         setLayout(new BorderLayout());
 
         // Label for the panel
@@ -12,24 +14,33 @@ public class ViewSessionsPanel extends JPanel {
         label.setFont(new Font("Arial", Font.BOLD, 16));
         add(label, BorderLayout.NORTH);
 
-        // Column names for the JTable
-        String[] columnNames = {"Title", "Speaker"};
+        // Create table and add to panel
+        JTable sessionTable = createSessionTable();
+        sessionTable.setRowHeight(25); // Set row height for readability
+        sessionTable.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        add(new JScrollPane(sessionTable), BorderLayout.CENTER);
+    }
 
-        // Retrieve session data
-        List<Session> sessions = Session.getAllSessions();
+    // Method to create and populate the session table
+    private JTable createSessionTable() {
+        String[] columnNames = {"Title", "Speaker"};
+        Object[][] data = fetchSessionData();
+        
+        JTable table = new JTable(data, columnNames);
+        table.setEnabled(false); // Read-only table
+        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+        return table;
+    }
+
+    // Helper method to fetch and format session data for the table
+    private Object[][] fetchSessionData() {
+        List<Session> sessions = sessionService.getAllSessions();
         Object[][] data = new Object[sessions.size()][2];
         
-        // Populate table data
         for (int i = 0; i < sessions.size(); i++) {
             data[i][0] = sessions.get(i).getTitle();
             data[i][1] = sessions.get(i).getSpeaker();
         }
-
-        // Create table with session data
-        JTable sessionTable = new JTable(data, columnNames);
-        sessionTable.setEnabled(false); // Read-only table
-        
-        // Add table to a scroll pane and to the panel
-        add(new JScrollPane(sessionTable), BorderLayout.CENTER);
+        return data;
     }
 }

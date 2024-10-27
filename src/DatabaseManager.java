@@ -57,8 +57,6 @@ public class DatabaseManager {
             try (PreparedStatement sessionStmt = conn.prepareStatement(insertAttendeeSessionSQL)) {
                 for (String title : sessionTitles) {
                     int sessionId = findSessionIdByTitle(conn, title);
-                    System.out.println(attendeeId);
-                    System.out.println(sessionId);
                     if (sessionId != -1 && !isAttendeeSessionLinked(conn, attendeeId, sessionId)) {
                         sessionStmt.setInt(1, attendeeId);
                         sessionStmt.setInt(2, sessionId);

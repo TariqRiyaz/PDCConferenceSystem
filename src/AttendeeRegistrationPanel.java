@@ -7,8 +7,13 @@ import java.util.List;
 public class AttendeeRegistrationPanel extends JPanel {
     private JTextField txtName, txtEmail;
     private JList<String> sessionList;
+    private RegistrationService registrationService; // Instance of RegistrationService
+    private SessionService sessionService;
+    
 
     public AttendeeRegistrationPanel() {
+        this.registrationService = new RegistrationService();
+        this.sessionService = new SessionService();
         setLayout(new BorderLayout());
 
         // North panel for input fields
@@ -26,7 +31,7 @@ public class AttendeeRegistrationPanel extends JPanel {
         sessionPanel.add(new JLabel("Select Sessions to Attend:"), BorderLayout.NORTH);
         
         // Fetch session titles
-        List<Session> sessions = Session.getAllSessions();
+        List<Session> sessions = sessionService.getAllSessions();
         String[] sessionTitles = sessions.stream().map(Session::getTitle).toArray(String[]::new);
         sessionList = new JList<>(sessionTitles);
         
@@ -57,18 +62,23 @@ public class AttendeeRegistrationPanel extends JPanel {
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Register action listener
-        btnRegister.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String name = txtName.getText();
-                String email = txtEmail.getText();
-                
-                // Get selected session titles
-        List<String> selectedSessions = sessionList.getSelectedValuesList();
+        btnRegister.addActionListener(e -> {
+            String name = txtName.getText().trim();
+            String email = txtEmail.getText().trim();
+            List<String> selectedSessions = sessionList.getSelectedValuesList();
 
-        // Save attendee and their sessions to the database
-        DatabaseManager.addAttendee(name, email, selectedSessions);
-
-        JOptionPane.showMessageDialog(null, "Attendee Registered Successfully");
+            try {
+                boolean success = registrationService.registerAttendee(name, email, selectedSessions);
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Attendee Registered Successfully");
+                    txtName.setText("");
+                    txtEmail.setText("");
+                    sessionList.clearSelection();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Registration Failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
