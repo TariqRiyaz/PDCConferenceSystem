@@ -53,6 +53,13 @@ public class MainFrame extends JFrame {
     
     public static void main(String[] args) {
         DatabaseManager.initializeDatabase();
+        // Check if the session table is populated
+        if (!DatabaseManager.isSessionTablePopulated()) {
+        System.out.println("populating database");
+        DatabaseManager.populateDefaultSessions(); // Populate if empty
+    }
+         // Display all sessions to verify population
+    DatabaseManager.displayAllSessions();
         SwingUtilities.invokeLater(() -> {
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
